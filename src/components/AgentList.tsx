@@ -28,13 +28,13 @@ const AgentCard = styled.div`
   padding: 16px;
   box-shadow: 0 2px 4px rgba(0,0,0,0.1);
   transition: transform 0.2s ease;
-  background: var(--accent-tertiary-alpha-500);
+  background: var(--background);
   cursor: pointer;
   border: 1px solid var(--accent-alpha-100);
   transition: all 0.2s ease;
 
   &:hover {
-    background: var(--accent-tertiary-alpha-800);
+    background: var(--background-alpha-800);
   }
 `;
 
@@ -45,8 +45,8 @@ const AgentCardRow = styled.div`
 `;
 
 const Photo = styled.img`
-  width: 100px;
-  height: 100px;
+  width: 80px;
+  height: 80px;
   object-fit: cover;
   border-radius: 8px;
 
@@ -150,10 +150,10 @@ export const AgentList = ({ isPrivate = false }: Props) => {
                 return (
                     <AgentCard key={agent.id} onClick={() => router.push(`/agent/${agent.id}`)}>
                         <AgentCardRow>
-                            <Box minWidth="100px">
+                            <Box minWidth="80px">
                                 <Photo
                                     className="agent-photo"
-                                    src={agent.imgUrl || '/person.png'}
+                                    src={agent.imgUrl || '/avatar.svg'}
                                     alt={agent.name}
                                 />
                                 {isPrivate && <Box mt={4} width="100%" display="flex" justifyContent="center">

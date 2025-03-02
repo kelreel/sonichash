@@ -1,5 +1,15 @@
 :root {
-	--background: #214E81;
+	--background: #131315;
+	--background-alpha-100: rgba(19, 19, 21, 0.1);
+	--background-alpha-200: rgba(19, 19, 21, 0.2);
+	--background-alpha-300: rgba(19, 19, 21, 0.3);
+	--background-alpha-400: rgba(19, 19, 21, 0.4);
+	--background-alpha-500: rgba(19, 19, 21, 0.5);
+	--background-alpha-600: rgba(19, 19, 21, 0.6);
+	--background-alpha-700: rgba(19, 19, 21, 0.7);
+	--background-alpha-800: rgba(19, 19, 21, 0.8);
+	--background-alpha-900: rgba(19, 19, 21, 0.9);
+
 	--foreground: #FFFFFF;
 	--accent: #ED5409;
 	--accent-alpha-100: rgba(237, 84, 9, 0.1);
@@ -94,8 +104,7 @@ header.header {
 	gap: 10px;
 	padding: 20px 20px;
 	backdrop-filter: blur(10px);
-	background-color: rgba(33, 78, 129, 0.7);
-	border-bottom: 1px solid var(--accent-tertiary-alpha-300);
+	background-color: var(--background);
 }
 
 .header-logo {

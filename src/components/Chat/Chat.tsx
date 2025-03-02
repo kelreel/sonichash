@@ -264,7 +264,7 @@ export const Chat = ({ agent }: Props) => {
       }
 
       // Play a notification sound when the agent responds
-      const audio = new Audio('/message.wav');
+      const audio = new Audio('/message.mp3');
       audio.play().catch(err => console.log('Error playing sound:', err));
 
       const agentMessage: Message = {
