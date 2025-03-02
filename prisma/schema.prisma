@@ -1,0 +1,93 @@
+generator client {
+    provider = "prisma-client-js"
+}
+
+datasource db {
+    provider = "postgresql"
+    url      = env("POSTGRES_URL")
+}
+
+enum AgentMode {
+    PUBLIC
+    PRIVATE
+}
+
+model User {
+    id            String   @id @default(uuid())
+    name          String?
+    walletAddress String   @unique
+    createdAt     DateTime @default(now())
+    updatedAt     DateTime @updatedAt
+
+    agents Agent[]
+
+    @@index([walletAddress])
+}
+
+model Agent {
+    id                   String    @id @default(uuid())
+    name                 String
+    imgUrl               String?
+    description          String?
+    ticker               String?
+    mode                 AgentMode @default(PRIVATE)
+    clients              String[]
+    modelProvider        String
+    systemPrompt         String?
+    bio                  String?
+    lore                 String?
+    knowledge            String?
+    walletAddress        String?
+    adjectives           String?
+    topics               String?
+    generalStyle         String?
+    chatStyle            String?
+    postStyle            String?
+    messageExamples      String[]
+    postExamples         String[]
+    twitterUrl           String?
+    telegramUrl          String?
+    siteUrl              String?
+    providePriceData     Boolean   @default(false)
+    providePortfolioData Boolean   @default(false)
+
+    tgBotSettings         Json?
+    twitterClientSettings Json?
+
+    createdAt DateTime @default(now())
+    updatedAt DateTime @updatedAt
+
+    userId String
+    user   User   @relation(fields: [userId], references: [id])
+
+    Room  Room[]
+    Cache Cache[]
+}
+
+model Room {
+    id      String @id @default(uuid())
+    agent   Agent  @relation(fields: [agentId], references: [id])
+    agentId String
+
+    createdAt DateTime @default(now())
+    updatedAt DateTime @updatedAt
+    Logs      Logs[]
+}
+
+model Logs {
+    id        String   @id @default(uuid())
+    room      Room     @relation(fields: [roomId], references: [id])
+    content   String
+    roomId    String
+    createdAt DateTime @default(now())
+    updatedAt DateTime @updatedAt
+}
+
+model Cache {
+    key       String   @id
+    agentId   String
+    value     Json
+    createdAt DateTime @default(now())
+    expiresAt DateTime
+    Agent     Agent    @relation(fields: [agentId], references: [id])
+}

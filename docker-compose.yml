@@ -1,0 +1,18 @@
+version: '3.8'
+
+services:
+  postgres:
+    image: postgres:15.1
+    container_name: postgres_sonic
+    restart: on-failure
+    ports:
+      - 5432:5432
+    volumes:
+      - db2:/var/lib/postgresql/data
+    environment:
+      - POSTGRES_USER=postgres
+      - POSTGRES_PASSWORD=postgres
+
+volumes:
+  db2:
+    driver: local

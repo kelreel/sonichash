@@ -1,0 +1,47 @@
+.glitch:hover{
+    opacity: 0.9;
+    text-shadow: 0px -5px #ad0a5c, 0px 5px #00c2cb, -5px 0px #d10b6e, 5px 0px #00c2cb;
+  }
+  
+  .glitch::before{
+    content: attr(data-text);
+    position: absolute;
+    top: 0;
+    left: 0;
+    color: #e0ffff;
+    z-index: -1;
+    width: 100%;
+  }
+  
+  .glitch:hover::before{
+    animation: glitchAnimate 60ms ease-in-out infinite;
+    z-index: 1;
+  }
+  
+  @keyframes glitchAnimate {
+    0%, 100%{
+      top: -5px;
+      left: 0;
+      opacity: 1;
+    }
+    20%{
+      top: 0;
+      left: -15px;
+      opacity: 0.7;
+    }
+    40%{
+      top: 6px;
+      left: 0;
+      opacity: 0.2;
+    }
+    60%{
+      top: 0;
+      left: 8px;
+      opacity: 0.3;
+    }
+    80%{
+      top: 0;
+      left: 0;
+      opacity: 0.9;
+    }
+}
