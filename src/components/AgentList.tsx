@@ -28,18 +28,13 @@ const AgentCard = styled.div`
   padding: 16px;
   box-shadow: 0 2px 4px rgba(0,0,0,0.1);
   transition: transform 0.2s ease;
-  background: #0e0e0ede;
+  background: var(--accent-tertiary-alpha-500);
   cursor: pointer;
   border: 1px solid var(--accent-alpha-100);
   transition: all 0.2s ease;
 
   &:hover {
-    transform: translateY(-4px);
-    background: #142f29e6;
-
-    .agent-photo {
-        transform: rotate(-2deg) scale(1.05);
-    }
+    background: var(--accent-tertiary-alpha-800);
   }
 `;
 
@@ -101,7 +96,7 @@ export const AgentList = ({ isPrivate = false }: Props) => {
     } = {
             agents: [],
             portfolios: []
-        }, isLoading } = useQuery<{ agents: Prisma.AgentGetPayload<{ include: { user: true } }>[]; portfolios: Record<string, ClearinghouseState> }>({
+        }, isLoading } = useQuery<{ agents: Prisma.AgentGetPayload<{ include: { user: true } }>[]; portfolios: Record<string, any> }>({
             queryKey: ['agents'],
             queryFn: () => fetch(`api/agents/${isPrivate ? 'private' : ''}`, {
                 headers: {
@@ -149,12 +144,8 @@ export const AgentList = ({ isPrivate = false }: Props) => {
         <Grid>
             {agents.map((agent: Prisma.AgentGetPayload<{ include: { user: true } }>) => {
                 // @ts-ignore
-                const portfolio: ClearinghouseState | null = agent.walletAddress ? portfolios[agent.walletAddress] : null;
+                const portfolio: any = agent.walletAddress ? portfolios[agent.walletAddress] : null;
                 let pnl = 0;
-
-                if (portfolio) {
-                    pnl = portfolio.assetPositions.reduce((acc, curr) => acc + Number(curr.position.unrealizedPnl), 0);
-                }
 
                 return (
                     <AgentCard key={agent.id} onClick={() => router.push(`/agent/${agent.id}`)}>

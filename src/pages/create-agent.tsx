@@ -18,13 +18,6 @@ export default function CreateAgentPage() {
       <div className="page">
         <Heading size="4xl">Create Agent</Heading>
 
-
-        <Box maxW="600px" w="100%" borderRadius="lg" border="1px solid" borderColor="blackAlpha.600">
-        <Alert status="info" title="Prompt Engineering" colorPalette="teal">
-          The agent's behavior and communication style depend heavily on the prompt. We recommend learning about prompt engineering and experimenting with the agent's settings to achieve better results.
-        </Alert>
-        </Box>
-
         <AgentForm action="create" />
       </div>
     </>

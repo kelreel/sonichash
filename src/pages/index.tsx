@@ -28,23 +28,10 @@ export default function Home() {
           <div className="desc">
             AI Agents platform for Sonic<br />
           </div>
-
-          {isAuthenticated && <>
-
-            <div className="row primary-row hide-on-desktop">
-              <Link className="btn-href" href="/private">
-                Your Agents
-              </Link>
-              <Link className="btn-href" href="/create-agent">
-                Create Agent
-              </Link>
-            </div>
-          </>}
-
         </div >
 
         <div className="main-agent-list">
-          <h2 className="main-agent-list-title bg-move">Launched Agents</h2>
+          <h2 className="main-agent-list-title glitch glitch-intense">Agents network</h2>
           <AgentList />
         </div>
       </div>

@@ -338,7 +338,8 @@ export const Chat = ({ agent }: Props) => {
             id="image-upload"
           />
           <label htmlFor="image-upload">
-            <Button as="span" variant="surface" size="sm" width="40px" height="40px" p="0">
+            <Button as="span" variant="surface" size="sm" height="40px">
+              Upload
               <img src="/image.svg" width="24px" height="24px" alt="Upload" />
             </Button>
           </label>

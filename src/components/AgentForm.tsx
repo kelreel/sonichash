@@ -219,7 +219,7 @@ export const AgentForm = ({ value = null, agentId, action }: Props) => {
     return (
         <Box as="form" onSubmit={handleSubmit} width="100%" maxW="600px" mx="auto" p={6} bg="blackAlpha.800" borderRadius="lg" boxShadow="md">
             <VStack>
-                <Avatar src={formData.imgUrl || '/person.png'} alt="Agent image" />
+                {formData.imgUrl && <Avatar src={formData.imgUrl} alt="Agent image" />}
 
                 <Fieldset.Root>
                     <Fieldset.Content>
@@ -422,7 +422,7 @@ export const AgentForm = ({ value = null, agentId, action }: Props) => {
                             />
                         </Field>
 
-                        <Field mt={4} label="Additional clients">
+                        <Field mt={4} label="Clients (soon)">
                         </Field>
 
                         <CheckboxCard

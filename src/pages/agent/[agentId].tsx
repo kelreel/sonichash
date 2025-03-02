@@ -11,7 +11,6 @@ import { shortenAddress } from "@/components/utils";
 import { useAccount } from "wagmi";
 import { ProgressBar, ProgressRoot, ProgressLabel } from "@/components/ui/progress";
 import Image from "next/image";
-import { Positions } from "@/components/Positions";
 import { AgentPublicBrief } from "@/types/agents";
 
 const Container = styled.div`
@@ -33,6 +32,7 @@ const Row = styled.div`
   width: 100%;
   display: flex;
   flex-flow: row nowrap;
+  align-items: flex-start;
   gap: 40px;
 
   @media (max-width: 768px) {
@@ -55,11 +55,7 @@ const AgentCard = styled(Box)`
   transition: all 0.2s ease;
 
   &:hover {
-    .agent-photo {
-      transform: rotate(-2deg) scale(1.02);
-    }
-
-    border: 1px solid var(--accent-alpha-300);
+    border: 1px solid var(--accent-alpha-700);
   }
 
   @media (max-width: 768px) {
@@ -190,19 +186,12 @@ export default function AgentPage() {
                         <Text>Description: {agent.description}</Text>
                         <Text>Created: {new Date(agent.createdAt).toLocaleDateString()} at {new Date(agent.createdAt).toLocaleTimeString()}</Text>
                         {agent.user && (
-                            <TextOneLine>Owner: {shortenAddress(agent.user.walletAddress)}</TextOneLine>
+                            <TextOneLine>Owner: {agent.user.walletAddress === address ? 'You' : shortenAddress(agent.user.walletAddress)}</TextOneLine>
                         )}
 
                         {agent.ticker && <Text>Ticker: {agent.ticker}</Text>}
 
-                        <Tag size="md" w="fit-content" p={2}>{agent.mode}</Tag>
-
-                        <ProgressRoot colorPalette="teal" value={90}>
-                            <ProgressLabel mb="2">
-                                Stamine (90%)
-                            </ProgressLabel>
-                            <ProgressBar />
-                        </ProgressRoot>
+                        {/* <Tag size="md" w="fit-content" p={2}>{agent.mode}</Tag> */}
 
                         {(agent.twitterUrl || agent.siteUrl || agent.telegramUrl) && <SocialsRow>
                             {agent.twitterUrl && <a href={agent.twitterUrl} target="_blank"><Image src="/x.svg" alt="Twitter" width={20} height={20} /></a>}
@@ -217,20 +206,7 @@ export default function AgentPage() {
                         </ButtonsRow>
                     </AgentCard>
 
-                    <TabsContainer>
-                        <Tabs.Root w="100%" defaultValue="chat" size="lg">
-                            <Tabs.List>
-                                <Tabs.Trigger value="chat">Chat</Tabs.Trigger>
-                            </Tabs.List>
-                            <Tabs.Content value="chat">
-                                <Chat agent={agent} />
-                            </Tabs.Content>
-                            <Tabs.Content value="positions">
-                                {/* @ts-ignore */}
-                                <Positions state={agent.state} />
-                            </Tabs.Content>
-                        </Tabs.Root>
-                    </TabsContainer>
+                    <Chat agent={agent} />
                 </Row>
             </Container>
         </>
