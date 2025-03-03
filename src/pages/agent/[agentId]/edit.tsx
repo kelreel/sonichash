@@ -28,7 +28,7 @@ export default function AgentEditPage() {
       <Head>
         <title>SonicHash</title>
         <meta name="viewport" content="width=device-width, initial-scale=1" />
-        <link rel="icon" href="/stars.svg" />
+        <link rel="icon" href="/sonic_white.svg" />
       </Head>
 
       <Header />
@@ -36,7 +36,7 @@ export default function AgentEditPage() {
         <Heading size="2xl">Edit {agent?.name}</Heading>
 
         <Box maxW="600px" w="100%" borderRadius="lg" border="1px solid" borderColor="blackAlpha.600">
-          <Alert status="info" title="Prompt Engineering" colorPalette="teal">
+          <Alert status="info" title="Prompt Engineering" colorPalette="border">
             The agent's behavior and communication style depend heavily on the prompt. We recommend learning about prompt engineering and experimenting with the agent's settings to achieve better results.
           </Alert>
         </Box>

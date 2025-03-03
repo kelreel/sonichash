@@ -16,7 +16,7 @@ export default function Home() {
       <Head>
         <title>SonicHash</title>
         <meta name="viewport" content="width=device-width, initial-scale=1" />
-        <link rel="icon" href="/stars.svg" />
+        <link rel="icon" href="/sonic_white.svg" />
       </Head>
 
       <Header />

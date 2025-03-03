@@ -153,7 +153,7 @@ export const AgentList = ({ isPrivate = false }: Props) => {
                             <Box minWidth="80px">
                                 <Photo
                                     className="agent-photo"
-                                    src={agent.imgUrl || '/avatar.svg'}
+                                    src={agent.imgUrl || '/user.png'}
                                     alt={agent.name}
                                 />
                                 {isPrivate && <Box mt={4} width="100%" display="flex" justifyContent="center">

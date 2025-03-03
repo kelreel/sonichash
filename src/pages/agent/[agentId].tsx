@@ -137,7 +137,7 @@ export default function AgentPage() {
                 <Head>
                     <title>Loading Agent...</title>
                     <meta name="viewport" content="width=device-width, initial-scale=1" />
-                    <link rel="icon" href="/stars.svg" />
+                    <link rel="icon" href="/sonic_white.svg" />
                 </Head>
 
                 <Header />
@@ -155,7 +155,7 @@ export default function AgentPage() {
                 <Head>
                     <title>Agent Not Found</title>
                     <meta name="viewport" content="width=device-width, initial-scale=1" />
-                    <link rel="icon" href="/stars.svg" />
+                    <link rel="icon" href="/sonic_white.svg" />
                 </Head>
 
                 <Header />
@@ -172,7 +172,7 @@ export default function AgentPage() {
             <Head>
                 <title>{agent.name}</title>
                 <meta name="viewport" content="width=device-width, initial-scale=1" />
-                <link rel="icon" href="/stars.svg" />
+                <link rel="icon" href="/sonic_white.svg" />
             </Head>
 
             <Header />
@@ -180,13 +180,12 @@ export default function AgentPage() {
                 <Row>
                     <AgentCard key={agent.id}>
                         <ProfileCenter>
-                            <Photo className="agent-photo" src={agent.imgUrl || '/person.png'} alt={agent.name} />
+                            <Photo className="agent-photo" src={agent.imgUrl || '/user.png'} alt={agent.name} />
                             <Heading textAlign="center" fontSize="2xl" mt={2}>{agent.name}</Heading>
                         </ProfileCenter>
-                        <Text>Description: {agent.description}</Text>
-                        <Text>Created: {new Date(agent.createdAt).toLocaleDateString()} at {new Date(agent.createdAt).toLocaleTimeString()}</Text>
+                        <Text>{agent.description}</Text>
                         {agent.user && (
-                            <TextOneLine>Owner: {agent.user.walletAddress === address ? 'You' : shortenAddress(agent.user.walletAddress)}</TextOneLine>
+                            <TextOneLine>Creator: {agent.user.walletAddress === address ? 'You' : shortenAddress(agent.user.walletAddress)}</TextOneLine>
                         )}
 
                         {agent.ticker && <Text>Ticker: {agent.ticker}</Text>}

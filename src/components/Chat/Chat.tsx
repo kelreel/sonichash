@@ -13,7 +13,7 @@ const ChatContainer = styled(Box)`
   gap: 16px;
   flex: 2;
   padding: 1rem;
-  background-color: #0c1214b4;
+  background-color: var(--background-alpha-600);
   border-radius: 12px;
 `;
 
@@ -28,7 +28,7 @@ const MessageBubble = styled(Box) <{ isUser: boolean }>`
   border-radius: 12px;
   max-width: 80%;
   margin: ${props => props.isUser ? "0.5rem 0 0.5rem auto" : "0.5rem auto 0.5rem 0"};
-  background: ${props => props.isUser ? "#3d2863" : "#083c36"};
+  background: ${props => props.isUser ? "var(--accent-alpha-700)" : "var(--background-alpha-900)"};
 `;
 
 const Textarea = styled.textarea`
@@ -363,8 +363,8 @@ export const Chat = ({ agent }: Props) => {
           colorScheme="blue"
           float="right"
           disabled={!input.trim()}
-        >
-          Send
+        >Send
+          <img src="/send.svg" width="24px" height="24px" alt="Send" />
         </Button>
       </ActionsRow>
 
