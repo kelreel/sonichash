@@ -7,8 +7,8 @@ import { authMiddleware, AuthUser } from "../middlewares/authMiddleware";
 import OpenAI from "openai";
 import { ChatCompletionContentPart } from "openai/resources/chat/completions.mjs";
 import { Prisma } from "@prisma/client";
-import { SonicService } from "../services/SonicService";
-import { ChatService } from "../services/ChatService";
+import { SonicService } from "../services/sonicService";
+import { ChatService } from "../services/chatService";
 
 const router = Router();
 

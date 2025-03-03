@@ -18,5 +18,5 @@
     }
   },
   "include": ["next-env.d.ts", "**/*.ts", "**/*.tsx", "agent-api/src/*.ts"],
-  "exclude": ["node_modules", "agent-api"]
+  "exclude": ["node_modules"]
 }

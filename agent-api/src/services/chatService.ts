@@ -2,6 +2,7 @@ import { OpenAI } from 'openai';
 import { Agent, User } from '@prisma/client';
 import { ChatCompletionContentPart } from 'openai/resources/chat/completions.mjs';
 import { AuthUser } from '../middlewares/authMiddleware';
+import { CryptoDataService } from './CryptoDataService';
 
 type InputMessage = {
   content: ChatCompletionContentPart[],
@@ -21,6 +22,7 @@ export interface ChatResponse {
 
 export class ChatService {
   private openai: OpenAI;
+  private cryptoDataService: CryptoDataService;
   private readonly priceKeywords = [
     'buy', 'sell', 'trade', 'price', 'pricing', 'dollars',
     'position', 'portfolio', 'portfolios', 'leverage', 'margin',
@@ -29,10 +31,16 @@ export class ChatService {
     'btc', 'eth', 'цена', 'asset', '$'
   ];
 
+  private readonly walletKeywords = [
+    'balance', 'balances', 'wallet', 'holdings', 'tokens',
+    'portfolio', 'assets', 'funds', 'deposit', 'withdraw'
+  ];
+
   constructor() {
     this.openai = new OpenAI({
       apiKey: process.env.OPENAI_API_KEY
     });
+    this.cryptoDataService = new CryptoDataService();
   }
 
   private buildContext(agent: Agent): string {
@@ -54,6 +62,12 @@ export class ChatService {
 
   private hasTradeKeywords(textContent: string): boolean {
     return this.priceKeywords.some(keyword => 
+      textContent.toLowerCase().includes(keyword)
+    );
+  }
+
+  private hasWalletKeywords(textContent: string): boolean {
+    return this.walletKeywords.some(keyword => 
       textContent.toLowerCase().includes(keyword)
     );
   }
@@ -82,17 +96,24 @@ export class ChatService {
     let contextWithData = context;
 
     if (user) {
-      contextWithData += `User wallet address: ${user.walletAddress}`;
+      contextWithData += ` User wallet address: ${user.walletAddress}`;
     }
 
-    if (this.hasTradeKeywords(textContent)) {
-      // TODO: Add price data to context if needed
-      // contextWithData += `User wallet address: ${user.walletAddress}`;
+    // Add wallet data if user asks about balances or if agent is configured to provide portfolio data
+    if (user && (this.hasWalletKeywords(textContent) || agent.providePortfolioData)) {
+      const walletData = await this.cryptoDataService.getWalletData(user.walletAddress);
+      if (walletData) {
+        contextWithData += ` ${this.cryptoDataService.formatWalletDataForContext(walletData)}`;
+      }
+    }
+
+    // Add price data if user asks about prices or if agent is configured to provide price data
+    if (this.hasTradeKeywords(textContent) || agent.providePriceData) {
+      // TODO: Add price data to context
+      // This can be implemented by adding a price service or using an external API
     }
 
     const systemPrompt = this.buildSystemPrompt(agent, contextWithData);
-
-    // console.log(systemPrompt);
 
     try {
       const completion = await this.openai.chat.completions.create({
