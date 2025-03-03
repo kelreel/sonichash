@@ -210,7 +210,7 @@ export const Chat = ({ agent }: Props) => {
   };
 
   const handleSendMessage = async () => {
-    if (messages.length > 8) {
+    if (messages.length > 20) {
       toaster.create({
         title: "You've reached the maximum number of messages",
         description: "Please start a new chat",

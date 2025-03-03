@@ -4,7 +4,7 @@
   "private": true,
   "scripts": {
     "dev": "next dev --turbopack",
-    "dev:api": "tsx watch agent-api/src/index.ts --env-file=.env",
+    "dev:api": "tsx watch agent-api/src/index.ts",
     "build": "next build",
     "start": "next start",
     "lint": "next lint",

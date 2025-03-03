@@ -8,6 +8,7 @@ import OpenAI from "openai";
 import { ChatCompletionContentPart } from "openai/resources/chat/completions.mjs";
 import { Prisma } from "@prisma/client";
 import { SonicService } from "../services/SonicService";
+import { ChatService, InputMessage } from "../services/ChatService";
 
 const router = Router();
 
@@ -115,13 +116,7 @@ router.get("/private", authMiddleware(true), async (req, res) => {
       userId: req.user!.id
     }
   });
-
-  let portfolios = {};
-  await Promise.allSettled(agents.filter(agent => agent.walletAddress).map(async (agent) => {
-    const SonicService = new SonicService(null, agent.walletAddress, true);
-  }));
-
-  res.json({ agents, portfolios });
+  res.json({ agents });
 });
 
 // CREATE AN AGENT
@@ -254,7 +249,7 @@ router.get("/:id/full", authMiddleware(true), async (req, res) => {
 
   let state: null;
 
-  res.json({...agent, state});
+  res.json({...agent});
 });
 
 // DELETE AN AGENT
@@ -288,109 +283,46 @@ router.delete("/:id", authMiddleware(true), async (req, res) => {
   }
 });
 
-type InputMessage = {
-  content: ChatCompletionContentPart[],
-  role: "user" | "assistant"
-}
-
-
 // CHAT with an agent
 // @ts-ignore
 router.post("/:id/chat", authMiddleware(false), async (req, res) => {
-  const agent = await prisma.agent.findFirst({
-    where: {
-      id: req.params.id
-    }
-  });
+  const chatService = new ChatService();
 
-  if (!agent) {
-    return res.status(404).json({ error: "Agent not found" });
-  }
-
-  if (agent.mode === "PRIVATE") {
-    if (agent.userId !== req.user?.id) {
-      return res.status(403).json({ error: "You are not authorized to chat with this private agent" });
-    }
-  }
-  
-  const { message, previousMessages = [] }: { message: InputMessage, previousMessages: InputMessage[] } = req.body;
-  if (!message) {
-    return res.status(400).json({ error: "Message is required" });
-  }
-  
-  if (previousMessages.length > 10) {
-    return res.status(400).json({ error: "Maximum of 10 previous messages allowed" });
-  }
-
-  const lores = agent.lore?.split('\n').filter(Boolean) || [];
-  const selectedLores = lores.sort(() => Math.random() - 0.5).slice(0, 3);
-
-  const bio = agent.bio?.split('\n').filter(Boolean) || [];
-  const selectedBio = bio.sort(() => Math.random() - 0.5).slice(0, 3);
-
-  let context = '';
-
-  const loreResult = selectedLores.length ? `Lore: ${selectedLores.join('. ')}.` : '';
-  const bioResult = selectedBio.length ? `Biography:${selectedBio.join('. ')}.` : '';
-
-  context += `${loreResult} ${bioResult}`;
-
-  const textContent = message.content.map(part => part.type === "text" ? part.text : '').join('');
-
-  if (agent.providePriceData || agent.providePortfolioData) {
-    const priceKeywords = ['buy', 'sell', 'trade', 'price', 'pricing', 'dollars', 'position', 'portfolio', 'portfolios', 'leverage', 'margin', 'margin used', 'unrealized', 'pnl', 'liquidation', 'entry price', 'size', 'usd value', 'max leverage', 'funding', 'short', 'long', 'btc', 'eth', 'цена', 'asset', '$'];
-    const hasTradeKeywords = priceKeywords.some(keyword => 
-      textContent.toLowerCase().includes(keyword)
-    );
-    
-    if (hasTradeKeywords && agent.providePriceData) {
-      // const SonicService = new SonicService(null, agent.walletAddress, true);
-      
-      // if (mids) {
-      //   context += `\n\nCurrent market prices:\n${Object.entries(mids).filter(([asset]) => !asset.includes('SPOT')).map(([asset, price]) => `${asset.split('-')[0]}: ${price} USD`).join('\n')}`;
-      // }
-    }
-
-    if (hasTradeKeywords && agent.providePortfolioData && agent.walletAddress) {
-      if (portfolio) {
-        context += `\n\n${portfolio}`;
-      }
-    }
-  }
-
-  const systemPrompt = `You are ${agent.name}. You were created by SonicHash user. Roleplay and generate interesting dialogue on behalf of the ${agent.name}. Never use emojis or hashtags or cringe stuff like that. Never act like an assistant. \n ${context} \n. ${agent.systemPrompt || ''}`
-
-  // console.log(systemPrompt);
-    
   try {
-    const openai = new OpenAI({
-      apiKey: process.env.OPENAI_API_KEY
-    });
-    const completion = await openai.chat.completions.create({
-      messages: [
-        {
-          role: "system",
-          content: systemPrompt
-        },
-        {
-          role: "user",
-          content: message.content
-        }
-      ],
-      model: "gpt-4o",
+    const {message, previousMessages = []} = req.body;
+
+    if (!message) {
+      return res.status(400).json({ error: "Message is required" });
+    }
+
+    if (previousMessages.length > 20) {
+      return res.status(400).json({ error: "Maximum of 20 previous messages allowed" });
+    }
+
+    const agent = await prisma.agent.findUnique({
+      where: {
+        id: req.params.id
+      }
     });
 
-    const response = completion.choices[0].message.content;
-    
-    res.json({ 
-      response,
-      messages: [
-        ...previousMessages,
-        { role: "user", content: message },
-        { role: "assistant", content: response }
-      ]
-    });
+    if (!agent) {
+      return res.status(404).json({ error: "Agent not found" });
+    }
 
+    // Validate access
+    const hasAccess = await chatService.validateAccess(agent, req.user as any);
+    if (!hasAccess) {
+      return res.status(403).json({ error: "You are not authorized to chat with this agent" });
+    }
+
+    // Generate response
+    const response = await chatService.generateResponse(
+      agent,
+      message,
+      req.body.previousMessages
+    );
+
+    res.json(response);
   } catch (error) {
     console.error('OpenAI API error:', error);
     res.status(500).json({ error: "Failed to get response from AI" });
