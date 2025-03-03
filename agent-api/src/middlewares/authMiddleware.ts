@@ -2,6 +2,12 @@ import { Request, Response, NextFunction } from 'express';
 import { SiweMessage } from 'siwe';
 import { prisma } from '../prisma';
 
+export type AuthUser = {
+  id: string;
+  walletAddress: string;
+  chainId: number;
+}
+
 export const authMiddleware = (required: boolean = true) => {
   return async (req: Request, res: Response, next: NextFunction) => {
     try {

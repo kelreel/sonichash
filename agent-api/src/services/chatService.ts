@@ -1,6 +1,7 @@
 import { OpenAI } from 'openai';
 import { Agent, User } from '@prisma/client';
 import { ChatCompletionContentPart } from 'openai/resources/chat/completions.mjs';
+import { AuthUser } from '../middlewares/authMiddleware';
 
 type InputMessage = {
   content: ChatCompletionContentPart[],
@@ -63,7 +64,7 @@ export class ChatService {
       .join('');
   }
 
-  public async validateAccess(agent: Agent, user?: User | null): Promise<boolean> {
+  public async validateAccess(agent: Agent, user?: AuthUser): Promise<boolean> {
     if (agent.mode === "PRIVATE" && agent.userId !== user?.id) {
       return false;
     }
@@ -73,27 +74,25 @@ export class ChatService {
   public async generateResponse(
     agent: Agent,
     message: InputMessage,
-    previousMessages: InputMessage[] = []
+    previousMessages: InputMessage[] = [],
+    user: AuthUser | null
   ): Promise<ChatResponse> {
     const context = this.buildContext(agent);
     const textContent = this.getTextContent(message);
     let contextWithData = context;
 
-    // Handle price and portfolio data if needed
-    if (agent.providePriceData || agent.providePortfolioData) {
-      if (this.hasTradeKeywords(textContent)) {
-        if (agent.providePriceData) {
-          // Add price data to context if needed
-          // contextWithData += await this.getPriceData();
-        }
-        if (agent.providePortfolioData && agent.walletAddress) {
-          // Add portfolio data to context if needed
-          // contextWithData += await this.getPortfolioData(agent.walletAddress);
-        }
-      }
+    if (user) {
+      contextWithData += `User wallet address: ${user.walletAddress}`;
+    }
+
+    if (this.hasTradeKeywords(textContent)) {
+      // TODO: Add price data to context if needed
+      // contextWithData += `User wallet address: ${user.walletAddress}`;
     }
 
     const systemPrompt = this.buildSystemPrompt(agent, contextWithData);
+
+    // console.log(systemPrompt);
 
     try {
       const completion = await this.openai.chat.completions.create({

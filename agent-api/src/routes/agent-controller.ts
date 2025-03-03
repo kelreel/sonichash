@@ -2,13 +2,13 @@ import { Router } from "express";
 import { prisma } from "../prisma";
 
 import { z } from "zod";
-import { authMiddleware } from "../middlewares/authMiddleware";
+import { authMiddleware, AuthUser } from "../middlewares/authMiddleware";
 
 import OpenAI from "openai";
 import { ChatCompletionContentPart } from "openai/resources/chat/completions.mjs";
 import { Prisma } from "@prisma/client";
 import { SonicService } from "../services/SonicService";
-import { ChatService, InputMessage } from "../services/ChatService";
+import { ChatService } from "../services/ChatService";
 
 const router = Router();
 
@@ -286,31 +286,32 @@ router.delete("/:id", authMiddleware(true), async (req, res) => {
 // CHAT with an agent
 // @ts-ignore
 router.post("/:id/chat", authMiddleware(false), async (req, res) => {
-  const chatService = new ChatService();
-
+  
   try {
     const {message, previousMessages = []} = req.body;
-
+    
     if (!message) {
       return res.status(400).json({ error: "Message is required" });
     }
-
+    
     if (previousMessages.length > 20) {
       return res.status(400).json({ error: "Maximum of 20 previous messages allowed" });
     }
-
+    
     const agent = await prisma.agent.findUnique({
       where: {
         id: req.params.id
       }
     });
-
+    
     if (!agent) {
       return res.status(404).json({ error: "Agent not found" });
     }
 
+    const chatService = new ChatService();
+    
     // Validate access
-    const hasAccess = await chatService.validateAccess(agent, req.user as any);
+    const hasAccess = await chatService.validateAccess(agent, req.user as AuthUser);
     if (!hasAccess) {
       return res.status(403).json({ error: "You are not authorized to chat with this agent" });
     }
@@ -319,7 +320,8 @@ router.post("/:id/chat", authMiddleware(false), async (req, res) => {
     const response = await chatService.generateResponse(
       agent,
       message,
-      req.body.previousMessages
+      req.body.previousMessages,
+      req.user
     );
 
     res.json(response);
