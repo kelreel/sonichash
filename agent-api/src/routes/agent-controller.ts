@@ -7,8 +7,9 @@ import { authMiddleware, AuthUser } from "../middlewares/authMiddleware";
 import OpenAI from "openai";
 import { ChatCompletionContentPart } from "openai/resources/chat/completions.mjs";
 import { Prisma } from "@prisma/client";
-import { SonicService } from "../services/sonicService";
 import { ChatService } from "../services/chatService";
+import { ActionsService, Action, ActionResult } from '../services/actionsService';
+import { Request, Response } from 'express';
 
 const router = Router();
 
@@ -328,6 +329,64 @@ router.post("/:id/chat", authMiddleware(false), async (req, res) => {
   } catch (error) {
     console.error('OpenAI API error:', error);
     res.status(500).json({ error: "Failed to get response from AI" });
+  }
+});
+
+
+// Get available actions
+// @ts-ignore
+router.get("/:id/actions", async (req, res) => {
+  try {
+    const { id } = req.params;
+
+    const agent = await prisma.agent.findUnique({
+      where: { id }
+    });
+
+    if (!agent) {
+      return res.status(404).json({ error: "Agent not found" });
+    }
+
+    const availableActions = [
+      {
+        type: "SWAP_TOKENS",
+        description: "Swap one token for another",
+        params: {
+          fromToken: "string",
+          toToken: "string",
+          amount: "string"
+        }
+      },
+      {
+        type: "SEND_TOKENS",
+        description: "Send tokens to another address",
+        params: {
+          token: "string",
+          to: "string",
+          amount: "string"
+        }
+      },
+      {
+        type: "GET_BALANCE",
+        description: "Get token balance for an address",
+        params: {
+          token: "string",
+          address: "string"
+        }
+      },
+      {
+        type: "GET_PRICE",
+        description: "Get current price of a token",
+        params: {
+          token: "string"
+        }
+      }
+    ];
+
+    res.json({ actions: availableActions });
+  } catch (error) {
+    console.error('Error getting available actions:', error);
+    res.status(500).json({ error: "Failed to get available actions" });
   }
 });
 

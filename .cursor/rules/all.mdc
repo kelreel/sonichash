@@ -23,3 +23,5 @@ Project contains 2 parts - front-end in /src folder and backend in /agent-api/sr
 use camelCase for backend file names
 
 in /agent-api/src use file names begin from lowercase letter
+
+use openai sdk/api for llm
