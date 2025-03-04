@@ -1,12 +1,13 @@
 import { OpenAI } from 'openai';
 import { Agent, User } from '@prisma/client';
-import { ChatCompletionContentPart } from 'openai/resources/chat/completions.mjs';
+import { ChatCompletionContentPart, ChatCompletionMessageParam } from 'openai/resources/chat/completions.mjs';
 import { AuthUser } from '../middlewares/authMiddleware';
-import { CryptoDataService } from './CryptoDataService';
+import { ContextBuilder } from './contextBuilder';
+import { writeFileSync } from 'fs';
 
 type InputMessage = {
-  content: ChatCompletionContentPart[],
-  role: "user" | "assistant"
+  content: string | ChatCompletionContentPart[],
+  role: "user" | "assistant" | "system"
 }
 
 export interface MessageContent {
@@ -22,60 +23,69 @@ export interface ChatResponse {
 
 export class ChatService {
   private openai: OpenAI;
-  private cryptoDataService: CryptoDataService;
-  private readonly priceKeywords = [
-    'buy', 'sell', 'trade', 'price', 'pricing', 'dollars',
-    'position', 'portfolio', 'portfolios', 'leverage', 'margin',
-    'margin used', 'unrealized', 'pnl', 'liquidation', 'entry price',
-    'size', 'usd value', 'max leverage', 'funding', 'short', 'long',
-    'btc', 'eth', 'цена', 'asset', '$'
-  ];
-
-  private readonly walletKeywords = [
-    'balance', 'balances', 'wallet', 'holdings', 'tokens',
-    'portfolio', 'assets', 'funds', 'deposit', 'withdraw'
-  ];
+  private contextBuilder: ContextBuilder;
 
   constructor() {
     this.openai = new OpenAI({
       apiKey: process.env.OPENAI_API_KEY
     });
-    this.cryptoDataService = new CryptoDataService();
+    this.contextBuilder = new ContextBuilder();
   }
 
-  private buildContext(agent: Agent): string {
-    const lores = agent.lore?.split('\n').filter(Boolean) || [];
-    const selectedLores = lores.sort(() => Math.random() - 0.5).slice(0, 3);
-
-    const bio = agent.bio?.split('\n').filter(Boolean) || [];
-    const selectedBio = bio.sort(() => Math.random() - 0.5).slice(0, 3);
-
-    const loreResult = selectedLores.length ? `Lore: ${selectedLores.join('. ')}.` : '';
-    const bioResult = selectedBio.length ? `Biography: ${selectedBio.join('. ')}.` : '';
-
-    return `${loreResult} ${bioResult}`.trim();
-  }
-
-  private buildSystemPrompt(agent: Agent, context: string): string {
-    return `You are ${agent.name}. You were created by SonicHash user. Roleplay and generate interesting dialogue on behalf of the ${agent.name}. Never use emojis or hashtags or cringe stuff like that. Never act like an assistant. \n ${context} \n. ${agent.systemPrompt || ''}`.trim();
-  }
-
-  private hasTradeKeywords(textContent: string): boolean {
-    return this.priceKeywords.some(keyword => 
-      textContent.toLowerCase().includes(keyword)
-    );
-  }
-
-  private hasWalletKeywords(textContent: string): boolean {
-    return this.walletKeywords.some(keyword => 
-      textContent.toLowerCase().includes(keyword)
-    );
+  private hasImageContent(messages: InputMessage[]): boolean {
+    return messages.some(msg => {
+      if (typeof msg.content === 'string') return false;
+      return msg.content.some(part => part.type === 'image_url');
+    });
   }
 
   private getTextContent(message: InputMessage): string {
+    if (typeof message.content === 'string') {
+      return message.content;
+    }
     return message.content
       .map(part => part.type === "text" ? part.text || '' : '')
       .join('');
+  }
+
+  private convertMessageContent(content: string | ChatCompletionContentPart[]): ChatCompletionMessageParam['content'] {
+    if (typeof content === 'string') {
+      return content;
+    }
+
+    return content.map(part => {
+      if (part.type === 'text') {
+        return { type: 'text', text: part.text };
+      } else if (part.type === 'image_url') {
+        return {
+          type: 'image_url',
+          image_url: {
+            url: part.image_url.url,
+            detail: 'high'
+          }
+        };
+      }
+      return { type: 'text', text: '' };
+    });
+  }
+
+  private convertToOpenAIMessages(
+    messages: InputMessage[],
+    systemContext: string
+  ): ChatCompletionMessageParam[] {
+    const convertedMessages: ChatCompletionMessageParam[] = [
+      { role: 'system', content: systemContext }
+    ];
+
+    messages.forEach(msg => {
+      const content = this.convertMessageContent(msg.content);
+      convertedMessages.push({
+        role: msg.role,
+        content
+      } as ChatCompletionMessageParam);
+    });
+
+    return convertedMessages;
   }
 
   public async validateAccess(agent: Agent, user?: AuthUser): Promise<boolean> {
@@ -91,43 +101,28 @@ export class ChatService {
     previousMessages: InputMessage[] = [],
     user: AuthUser | null
   ): Promise<ChatResponse> {
-    const context = this.buildContext(agent);
     const textContent = this.getTextContent(message);
-    let contextWithData = context;
+    
+    // Build system context without message history
+    const systemContext = await this.contextBuilder.buildContext({
+      agent,
+      user: user || undefined,
+      messageContent: textContent
+    });
 
-    if (user) {
-      contextWithData += ` User wallet address: ${user.walletAddress}`;
-    }
-
-    // Add wallet data if user asks about balances or if agent is configured to provide portfolio data
-    if (user && (this.hasWalletKeywords(textContent) || agent.providePortfolioData)) {
-      const walletData = await this.cryptoDataService.getWalletData(user.walletAddress);
-      if (walletData) {
-        contextWithData += ` ${this.cryptoDataService.formatWalletDataForContext(walletData)}`;
-      }
-    }
-
-    // Add price data if user asks about prices or if agent is configured to provide price data
-    if (this.hasTradeKeywords(textContent) || agent.providePriceData) {
-      // TODO: Add price data to context
-      // This can be implemented by adding a price service or using an external API
-    }
-
-    const systemPrompt = this.buildSystemPrompt(agent, contextWithData);
-
+    // Combine all messages including the current one
+    const allMessages = [...previousMessages, message];
+    
     try {
+      const messages = this.convertToOpenAIMessages(allMessages, systemContext);
+      writeFileSync('allMessages.json', JSON.stringify(messages, null, 2));
+
+      const hasImages = this.hasImageContent(allMessages);
+      const model = hasImages ? "gpt-4o" : "gpt-4o-mini";
+
       const completion = await this.openai.chat.completions.create({
-        messages: [
-          {
-            role: "system",
-            content: systemPrompt
-          },
-          {
-            role: 'user',
-            content: message.content
-          }
-        ],
-        model: "gpt-4",
+        messages,
+        model,
       });
 
       const response = completion.choices[0].message.content || '';
@@ -135,9 +130,8 @@ export class ChatService {
       return {
         response,
         messages: [
-          ...previousMessages,
-          message,
-          { role: "assistant", content: [{ type: "text", text: response }] }
+          ...allMessages,
+          { role: "assistant", content: response }
         ]
       };
     } catch (error) {
