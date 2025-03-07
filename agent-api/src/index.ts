@@ -5,10 +5,11 @@ import userController from "./routes/user-controller";
 import dotenv from "dotenv";
 import { connectPrisma } from "./prisma";
 import filesController from "./routes/files-controller";
+import { CONFIG } from "./config";
 
 dotenv.config();
 
-const port = parseInt(process.env.PORT || "3005", 10);
+const port = CONFIG.PORT;
 if (!port) {
   throw new Error("PORT is missing");
 }

@@ -1,163 +1,140 @@
-import { ethers } from 'ethers';
-import { Agent, User } from '@prisma/client';
+import { Agent } from '@prisma/client';
+import OpenAI from 'openai';
+import { CONFIG } from '../config';
 import { AuthUser } from '../middlewares/authMiddleware';
+import axios from 'axios';
+import { AlloraPredictResponse } from '../types/allora-predict';
 
-export type ActionType = 'SWAP_TOKENS' | 'SEND_TOKENS' | 'GET_BALANCE' | 'GET_PRICE';
+export type ActionType = 'PREDICT_PRICE'
 
-export interface Transaction {
-  to: string;
-  data: string;
-  value?: string;
-  description: string;
+export interface PredictPriceParams {
+  ticker: string;
+  timeframe: string;
 }
 
-export interface SwapTokensParams {
-  fromToken: string;
-  toToken: string;
-  amount: string;
-  transactions: Transaction[];
-}
-
-export interface SendTokensParams {
-  token: string;
-  to: string;
-  amount: string;
-  transaction: Transaction;
-}
-
-export interface GetBalanceParams {
-  token: string;
-  address: string;
-}
-
-export interface GetPriceParams {
-  token: string;
-}
-
-export type ActionParams = SwapTokensParams | SendTokensParams | GetBalanceParams | GetPriceParams;
+export type ActionParams = PredictPriceParams;
 
 export interface Action {
   type: ActionType;
   params: ActionParams;
 }
 
-export interface ActionResult {
-  success: boolean;
-  data?: any;
-  error?: string;
-  transactions?: Transaction[];
-}
+const ACTION_LIST = [
+  {
+    type: 'PREDICT_PRICE',
+    examples: [
+      'predict price of BTC in 5 minutes -> {"type": "PREDICT_PRICE", "params": {"ticker": "BTC", "timeframe": "5m"}}',
+      'ETH (Ethereum) price in 1 hour -> {"type": "PREDICT_PRICE", "params": {"ticker": "ETH", "timeframe": "1h"}}',
+      'the price of a Solana (SOL) in an 8 hours -> {"type": "PREDICT_PRICE", "params": {"ticker": "SOL", "timeframe": "8h"}}',
+    ],
+    description: 'Predict the price of a cryptocurrency in a given timeframe. The ticker is the symbol of the cryptocurrency. Timeframe can be 5m or 8 hour only.'
+  }
+]
 
 export class ActionsService {
-  private provider: ethers.Provider;
+  private openai: OpenAI;
 
-  constructor() {
-    this.provider = new ethers.JsonRpcProvider(process.env.RPC_URL);
+  constructor () {
+    this.openai = new OpenAI({
+      apiKey: CONFIG.OPENAI_API_KEY
+    });
   }
 
-  public async executeAction(
+  async detectAction(message: string): Promise<Action | null> {
+    try {
+      const completion = await this.openai.chat.completions.create({
+        model: "gpt-4o",
+        messages: [
+          {
+            role: "system",
+            content: `You are an action detector. Analyze the user's message and determine if it contains any related actions.
+            If an action is detected, return a JSON object with the following structure as example:
+            {
+              "type": "PREDICT_PRICE",
+              "params": {
+                // Parameters specific to the action type
+              }
+            }
+            If no action is detected, return null (it's important!).
+            
+            Example actions:
+            ${ACTION_LIST.map(action => `${action.description}\nExamples:\n${action.examples.join('\n')}`).join('\n\n')}`
+          },
+          {
+            role: "user",
+            content: message
+          }
+        ],
+        temperature: 0.1,
+        response_format: { type: "json_object" }
+      });
+
+      try {
+        const content = completion.choices[0].message.content || 'null';
+        const response = JSON.parse(content);
+
+        if (response !== null && (!response.type || !response.params)) {
+          console.warn('Invalid action response structure:', response);
+          return null;
+        }
+
+        console.log('*** response', response);
+
+        if (ACTION_LIST.some(action => action.type === response.type)) {
+          return response;
+        }
+        
+        return null;
+      } catch (parseError) {
+        console.error('Error parsing action response:', parseError);
+        return null;
+      }
+    } catch (error) {
+      console.error('Error detecting action:', error);
+      return null;
+    }
+  }
+
+  async executeAction(
     action: Action,
     agent: Agent,
-    user: AuthUser
-  ): Promise<ActionResult> {
+    user: AuthUser | null
+  ): Promise<string> {
     try {
       switch (action.type) {
-        case 'SWAP_TOKENS':
-          return await this.swapTokens(action.params as SwapTokensParams, agent, user);
-        case 'SEND_TOKENS':
-          return await this.sendTokens(action.params as SendTokensParams, agent, user);
-        case 'GET_BALANCE':
-          return await this.getBalance(action.params as GetBalanceParams, agent, user);
-        case 'GET_PRICE':
-          return await this.getPrice(action.params as GetPriceParams);
+        case 'PREDICT_PRICE':
+          return await this.predictPrice(action.params as PredictPriceParams, agent);
         default:
           throw new Error(`Unsupported action type: ${action.type}`);
       }
     } catch (error) {
-      return {
-        success: false,
-        error: error instanceof Error ? error.message : 'Unknown error occurred'
-      };
+      console.error('Error executing action:', error);
+      return ''};
+    }
+
+  private async predictPrice(
+    params: PredictPriceParams,
+    agent: Agent,
+  ): Promise<string> {
+    try {
+      if (!['btc', 'eth', 'sol'].includes(params.ticker.toLowerCase())) {
+        return `Price prediction is not available for ${params.ticker}.`;
+      }
+
+      if (params.timeframe.toLowerCase() !== '5m' && params.timeframe.toLowerCase() !== '8h') {
+        return `Price prediction timeframe ${params.timeframe} is not supported. Only 5 minutes and 8 hours are supported.`;
+      }
+
+      const data = await axios.get<AlloraPredictResponse>(`https://api.upshot.xyz/v2/allora/consumer/price/ethereum-11155111/${params.ticker.toLowerCase()}/${params.timeframe.toLowerCase()}`, {
+        headers: {
+          'x-api-key': CONFIG.ALLORA_API_KEY
+        }
+      })
+      const prediction = data.data.data.inference_data.network_inference_normalized;
+
+      return `Price prediction:The price of ${params.ticker} in ${params.timeframe} is ${prediction}`;
+    } catch (error) {
+      return `Error predicting price: ${params.ticker} in ${params.timeframe}`;
     }
   }
-
-  private async swapTokens(
-    params: SwapTokensParams,
-    agent: Agent,
-    user: AuthUser
-  ): Promise<ActionResult> {
-    // Here we would prepare the transactions for the swap
-    // For example, a typical DEX swap might require:
-    // 1. Approve token spending
-    // 2. Execute swap
-    const transactions: Transaction[] = [
-      {
-        to: params.fromToken, // Token contract address
-        data: "0x095ea7b3000000000000000000000000...", // approve(address,uint256) encoded data
-        description: "Approve token spending for swap"
-      },
-      {
-        to: "0x...", // DEX router address
-        data: "0x38ed1739000000000000000000000000...", // swapExactTokensForTokens encoded data
-        description: "Execute token swap"
-      }
-    ];
-
-    return {
-      success: true,
-      data: { 
-        message: 'Swap transactions prepared',
-        fromToken: params.fromToken,
-        toToken: params.toToken,
-        amount: params.amount
-      },
-      transactions
-    };
-  }
-
-  private async sendTokens(
-    params: SendTokensParams,
-    agent: Agent,
-    user: AuthUser
-  ): Promise<ActionResult> {
-    // Prepare the transaction for token transfer
-    const transaction: Transaction = {
-      to: params.token, // Token contract address
-      data: "0xa9059cbb000000000000000000000000...", // transfer(address,uint256) encoded data
-      description: `Send ${params.amount} ${params.token} to ${params.to}`
-    };
-
-    return {
-      success: true,
-      data: { 
-        message: 'Transfer transaction prepared',
-        token: params.token,
-        to: params.to,
-        amount: params.amount
-      },
-      transactions: [transaction]
-    };
-  }
-
-  private async getBalance(
-    params: GetBalanceParams,
-    agent: Agent,
-    user: AuthUser
-  ): Promise<ActionResult> {
-    // This is a read-only operation, no transactions needed
-    return {
-      success: true,
-      data: { balance: '0' }
-    };
-  }
-
-  private async getPrice(
-    params: GetPriceParams
-  ): Promise<ActionResult> {
-    // This is a read-only operation, no transactions needed
-    return {
-      success: true,
-      data: { price: '0' }
-    };
-  }
-} 
+}

@@ -4,6 +4,7 @@ import formidable from 'formidable';
 import fs from 'fs';
 import path from 'path';
 import { Request, Response } from 'express';
+import { CONFIG } from '../config';
 
 const router = Router();
 
@@ -30,11 +31,11 @@ router.post('/', async (req: Request, res: Response) => {
         
         // Configure S3 client
         const s3Client = new S3Client({
-            region: process.env.S3_REGION || 'auto',
-            endpoint: process.env.S3_ENDPOINT,
+            region: CONFIG.S3_REGION,
+            endpoint: CONFIG.S3_ENDPOINT,
             credentials: {
-                accessKeyId: process.env.S3_ACCESS_KEY_ID || '',
-                secretAccessKey: process.env.S3_SECRET_ACCESS_KEY || '',
+                accessKeyId: CONFIG.S3_ACCESS_KEY_ID || '',
+                secretAccessKey: CONFIG.S3_SECRET_ACCESS_KEY || '',
             },
             forcePathStyle: true
         });
@@ -46,7 +47,7 @@ router.post('/', async (req: Request, res: Response) => {
         try {
             // Upload to S3
             const command = new PutObjectCommand({
-                Bucket: process.env.S3_BUCKET_NAME || '',
+                Bucket: CONFIG.S3_BUCKET_NAME,
                 Key: `uploads/${fileName}`,
                 Body: fileContent,
                 ContentType: file.mimetype || 'application/octet-stream',
@@ -58,8 +59,8 @@ router.post('/', async (req: Request, res: Response) => {
             fs.unlinkSync(file.filepath);
             
             // Return success with file URL
-            const fileUrl = process.env.S3_CUSTOM_DOMAIN 
-                ? `${process.env.S3_CUSTOM_DOMAIN}/uploads/${fileName}`
+            const fileUrl = CONFIG.S3_CUSTOM_DOMAIN 
+                ? `${CONFIG.S3_CUSTOM_DOMAIN}/uploads/${fileName}`
                 : `uploads/${fileName}`;
                 
             return res.status(200).json({ 
@@ -74,7 +75,7 @@ router.post('/', async (req: Request, res: Response) => {
             
             // Try alternative upload approach if first one fails
             const alternativeCommand = new PutObjectCommand({
-                Bucket: process.env.S3_BUCKET_NAME || '',
+                Bucket: CONFIG.S3_BUCKET_NAME,
                 Key: `uploads/${fileName}`,
                 Body: fs.createReadStream(file.filepath),
                 ContentType: file.mimetype || 'application/octet-stream',
@@ -86,8 +87,8 @@ router.post('/', async (req: Request, res: Response) => {
             fs.unlinkSync(file.filepath);
             
             // Return success with file URL
-            const fileUrl = process.env.S3_CUSTOM_DOMAIN 
-                ? `${process.env.S3_CUSTOM_DOMAIN}/uploads/${fileName}`
+            const fileUrl = CONFIG.S3_CUSTOM_DOMAIN 
+                ? `${CONFIG.S3_CUSTOM_DOMAIN}/uploads/${fileName}`
                 : `uploads/${fileName}`;
                 
             return res.status(200).json({ 

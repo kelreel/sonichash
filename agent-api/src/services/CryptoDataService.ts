@@ -2,7 +2,7 @@ import { ethers } from 'ethers';
 import NodeCache from 'node-cache';
 import { SONIC_TOKENS, TokenInfo } from '../constants/tokens';
 import { PriceService } from './priceService';
-
+import { CONFIG } from '../config';
 const cache = new NodeCache({ stdTTL: 60 }); // Cache TTL set to 1 minute
 
 const ERC20_ABI = [
@@ -44,7 +44,7 @@ export class CryptoDataService {
 
   constructor() {
     this.cache = cache;
-    this.provider = new ethers.JsonRpcProvider(process.env.RPC_URL || 'https://rpc.soniclabs.com');
+    this.provider = new ethers.JsonRpcProvider(CONFIG.SONIC_RPC_URL);
     this.priceService = new PriceService();
   }
 

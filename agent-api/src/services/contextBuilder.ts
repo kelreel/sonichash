@@ -7,6 +7,7 @@ export interface ContextData {
   agent: Agent;
   user?: AuthUser;
   messageContent: string;
+  actionContext?: string;
   previousMessages?: Array<{
     role: 'user' | 'assistant';
     content: string;
@@ -96,7 +97,7 @@ export class ContextBuilder {
     const agentContext = this.buildAgentContext(data.agent);
     const userContext = await this.buildUserContext(data.messageContent, data.user);
     const messageHistory = this.buildMessageHistory(data.previousMessages);
-
+    const actionContext = data.actionContext || '';
     const systemPrompt = data.agent.systemPrompt || '';
     const knowledge = data.agent.knowledge || '';
     const style = data.agent.chatStyle || '';
@@ -110,7 +111,8 @@ export class ContextBuilder {
       knowledge,
       style,
       userContext,
-      messageHistory
+      messageHistory,
+      actionContext
     ].filter(Boolean).join('\n\n');
   }
 } 

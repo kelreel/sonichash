@@ -1,5 +1,4 @@
 import NodeCache from 'node-cache';
-import { TokenInfo } from '../constants/tokens';
 import axios from 'axios';
 
 const PRICE_CACHE_TTL = 300; // Cache prices for 5 minutes
