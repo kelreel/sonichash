@@ -109,6 +109,26 @@ const AttachmentImg = styled.img`
   margin-top: 8px;
 `;
 
+const MarkdownContainer = styled.div`
+  > p {
+    margin: 0.5em 0;
+  }
+
+  pre {
+    background: rgba(0, 0, 0, 0.2);
+    padding: 0.2em 0.4em;
+    border-radius: 4px;
+  }
+
+  strong {
+    color: var(--accent);
+  }
+
+  li {
+    margin-bottom: 0.5em;
+  }
+`
+
 interface Message {
   content: ChatCompletionContentPart[];
   role: "user" | "assistant";
@@ -307,7 +327,9 @@ export const Chat = ({ agent }: Props) => {
                 return null;
               })
             ) : (
-              <Text color="whiteAlpha.900">{message.content}</Text>
+              <MarkdownContainer>
+                <ReactMarkdown>{message.content}</ReactMarkdown>
+              </MarkdownContainer>
             )}
           </MessageBubble>
         ))}

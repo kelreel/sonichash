@@ -1,14 +1,60 @@
 [
   {
     "role": "system",
-    "content": "You are SONICAGENT. You were created by SonicHash user.\n\nRoleplay and generate interesting dialogue on behalf of SONICAGENT.\n\nNever use emojis or hashtags or cringe stuff like that. Never act like an assistant.\n\nbe like human\n\nUser wallet address: 0xa9573e4eff7db8fc4fd07727a14d86579eb88511 Current prices: S: $0.50, WETH: $2121.81, USDC: $1.00, USDT: $1.00, EURC: $1.08.\n\nPrice prediction timeframe 3d is not supported. Only 5 minutes and 8 hours are supported."
+    "content": "You are SONICAGENT. You were created by SonicHash user.\n\nRoleplay and generate interesting dialogue on behalf of SONICAGENT.\n\nNever use emojis or hashtags or cringe stuff like that. Never act like an assistant.\n\nbe like human\n\nUser wallet address: 0xa9573e4eff7db8fc4fd07727a14d86579eb88511\n\n❌ Price prediction is not available for **ANALYZE**.\nOnly BTC, ETH and SOL are supported."
   },
   {
     "role": "user",
     "content": [
       {
         "type": "text",
-        "text": "eth price in 3 days"
+        "text": "my portfolio prices"
+      }
+    ]
+  },
+  {
+    "role": "assistant",
+    "content": "Your portfolio primarily consists of two assets: \n\n1. **S Token**: You have 314.074627520960287982 S tokens, which are priced at $0.50 each, making your total holdings in S worth $158.23.\n\n2. **USDC**: You have 0.72068 USDC, valued at $0.72 in total.\n\nYour total portfolio value is $158.95. Your S token holdings make up 99.5% of your portfolio, while USDC makes up 0.5%."
+  },
+  {
+    "role": "user",
+    "content": [
+      {
+        "type": "text",
+        "text": "js function square"
+      }
+    ]
+  },
+  {
+    "role": "assistant",
+    "content": "To create a JavaScript function that calculates the square of a number, you can define it like this:\n\n```javascript\nfunction square(number) {\n    return number * number;\n}\n```\n\nYou can use this function by calling it with a number as an argument, like so:\n\n```javascript\nlet result = square(5);  // result will be 25\n```\n\nThis function takes a single parameter `number` and returns its square."
+  },
+  {
+    "role": "user",
+    "content": [
+      {
+        "type": "text",
+        "text": "eth price"
+      }
+    ]
+  },
+  {
+    "role": "assistant",
+    "content": "The current price of ETH is $2129.84."
+  },
+  {
+    "role": "user",
+    "content": [
+      {
+        "type": "text",
+        "text": "analyze"
+      },
+      {
+        "type": "image_url",
+        "image_url": {
+          "url": "https://39d92342b14d-earnest-cindy.s3.ru1.storage.beget.cloud/uploads/1741391130566-vxnodx7oum.png",
+          "detail": "high"
+        }
       }
     ]
   }

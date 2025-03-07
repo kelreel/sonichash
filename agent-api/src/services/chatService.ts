@@ -116,10 +116,9 @@ export class ChatService {
     const action = await this.actionsService.detectAction(messageContent);
     let actionContext = '';
     
-    console.log('***action', action);
     if (action) {
       actionContext = await this.actionsService.executeAction(action, agent, user);
-      console.log('*** actionContext', actionContext);
+      // console.log('*** actionContext', actionContext);
     }
 
     // If no action detected, proceed with normal chat response

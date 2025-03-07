@@ -4,6 +4,8 @@ import { CONFIG } from '../config';
 import { AuthUser } from '../middlewares/authMiddleware';
 import axios from 'axios';
 import { AlloraPredictResponse } from '../types/allora-predict';
+import NodeCache from 'node-cache';
+import { ConfigService } from './configService';
 
 export type ActionType = 'PREDICT_PRICE'
 
@@ -31,13 +33,17 @@ const ACTION_LIST = [
   }
 ]
 
+const cache = new NodeCache({ stdTTL: 60 });
+
 export class ActionsService {
   private openai: OpenAI;
+  private cache: NodeCache;
 
   constructor () {
     this.openai = new OpenAI({
       apiKey: CONFIG.OPENAI_API_KEY
     });
+    this.cache = cache;
   }
 
   async detectAction(message: string): Promise<Action | null> {
@@ -118,23 +124,32 @@ export class ActionsService {
   ): Promise<string> {
     try {
       if (!['btc', 'eth', 'sol'].includes(params.ticker.toLowerCase())) {
-        return `Price prediction is not available for ${params.ticker}.`;
+        return `❌ Price prediction is not available for **${params.ticker}**.\nOnly BTC, ETH and SOL are supported.`;
       }
 
       if (params.timeframe.toLowerCase() !== '5m' && params.timeframe.toLowerCase() !== '8h') {
-        return `Price prediction timeframe ${params.timeframe} is not supported. Only 5 minutes and 8 hours are supported.`;
+        return `❌ Price prediction timeframe **${params.timeframe}** is not supported.\nOnly 5 minutes and 8 hours are supported.`;
+      }
+      
+      const cacheKey = `price_prediction_${params.ticker}_${params.timeframe}`;
+      const cachedPrediction = this.cache.get(cacheKey);
+      
+      if (cachedPrediction) {
+        return `🔮 Price prediction for **${params.ticker}** (${params.timeframe}):\n\`${cachedPrediction}\` (cached)`;
       }
 
       const data = await axios.get<AlloraPredictResponse>(`https://api.upshot.xyz/v2/allora/consumer/price/ethereum-11155111/${params.ticker.toLowerCase()}/${params.timeframe.toLowerCase()}`, {
         headers: {
           'x-api-key': CONFIG.ALLORA_API_KEY
         }
-      })
+      });
+      
       const prediction = data.data.data.inference_data.network_inference_normalized;
+      this.cache.set(cacheKey, prediction);
 
-      return `Price prediction:The price of ${params.ticker} in ${params.timeframe} is ${prediction}`;
+      return `🔮 Price prediction for **${params.ticker}** (${params.timeframe}):\n\`${prediction}\``;
     } catch (error) {
-      return `Error predicting price: ${params.ticker} in ${params.timeframe}`;
+      return `❌ Error predicting price for **${params.ticker}** in ${params.timeframe}`;
     }
   }
 }

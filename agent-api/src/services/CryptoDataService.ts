@@ -3,7 +3,6 @@ import NodeCache from 'node-cache';
 import { SONIC_TOKENS, TokenInfo } from '../constants/tokens';
 import { PriceService } from './priceService';
 import { CONFIG } from '../config';
-const cache = new NodeCache({ stdTTL: 60 }); // Cache TTL set to 1 minute
 
 const ERC20_ABI = [
   'function balanceOf(address owner) view returns (uint256)',
@@ -36,6 +35,8 @@ export interface WalletData {
   totalUsdValue: number;
   analytics: PortfolioAnalytics;
 }
+
+const cache = new NodeCache({ stdTTL: 60 });
 
 export class CryptoDataService {
   private cache: NodeCache;
