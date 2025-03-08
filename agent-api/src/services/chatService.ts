@@ -123,9 +123,9 @@ export class ChatService {
     });
     const messages = this.convertToOpenAIMessages([...previousMessages, message], systemContext);
 
-    console.log('*** systemContext', systemContext);
+    // console.log('*** systemContext', systemContext);
 
-    writeFileSync('messages-log--temp.json', JSON.stringify(messages, null, 2));
+    // writeFileSync('messages-log--temp.json', JSON.stringify(messages, null, 2));
 
     const completion = await this.openai.chat.completions.create({
       model: "gpt-4o",

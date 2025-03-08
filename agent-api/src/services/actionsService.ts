@@ -82,8 +82,6 @@ export class ActionsService {
           return null;
         }
 
-        console.log('*** response', response);
-
         if (ACTION_LIST.some(action => action.type === response.type)) {
           return response;
         }

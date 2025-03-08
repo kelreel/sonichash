@@ -1,40 +1,82 @@
-This is a [Next.js](https://nextjs.org) project bootstrapped with [`create-next-app`](https://nextjs.org/docs/pages/api-reference/create-next-app).
+# SonicHash
 
-## Getting Started
+A modern AI-agent platform built with Next.js that combines blockchain technology with a powerful tech stack for a seamless user experience.
 
-First, run the development server:
+## 🚀 Features
+
+- Web3 Integration with RainbowKit and Wagmi
+- Next.js 15 with App Router
+- Chakra UI for beautiful, responsive design
+- Prisma for database management
+- OpenAI integration
+- AWS S3 integration
+- Authentication withSIWE
+- TypeScript support
+- API routes with Express
+
+## 🛠 Prerequisites
+
+- Node.js 18+ 
+- npm/yarn/pnpm
+- A Web3 wallet (like MetaMask)
+
+## 📦 Installation
+
+1. Clone the repository:
+```bash
+git clone https://github.com/yourusername/sonichash.git
+cd sonichash
+```
+
+2. Install dependencies:
+```bash
+npm install
+```
+
+3. Set up environment variables:
+```bash
+cp .example.env .env
+```
+Edit `.env` with your configuration.
+
+4. Generate Prisma client:
+```bash
+npx prisma generate
+```
+
+## 🚀 Development
+
+Run the development server:
 
 ```bash
 npm run dev
-# or
-yarn dev
-# or
-pnpm dev
-# or
-bun dev
 ```
 
-Open [http://localhost:3000](http://localhost:3000) with your browser to see the result.
+For the API server:
+```bash
+npm run dev:api
+```
 
-You can start editing the page by modifying `pages/index.tsx`. The page auto-updates as you edit the file.
+Visit [http://localhost:3000](http://localhost:3000) to see your application.
 
-[API routes](https://nextjs.org/docs/pages/building-your-application/routing/api-routes) can be accessed on [http://localhost:3000/api/hello](http://localhost:3000/api/hello). This endpoint can be edited in `pages/api/hello.ts`.
+## 🏗 Project Structure
 
-The `pages/api` directory is mapped to `/api/*`. Files in this directory are treated as [API routes](https://nextjs.org/docs/pages/building-your-application/routing/api-routes) instead of React pages.
+- `/src` - Main application code
+- `/prisma` - Database schema and migrations
+- `/agent-api` - API server code
+- `/public` - Static assets
 
-This project uses [`next/font`](https://nextjs.org/docs/pages/building-your-application/optimizing/fonts) to automatically optimize and load [Geist](https://vercel.com/font), a new font family for Vercel.
+## 🔧 Technologies
 
-## Learn More
+- [Next.js](https://nextjs.org/)
+- [RainbowKit](https://www.rainbowkit.com/)
+- [Wagmi](https://wagmi.sh/)
+- [Chakra UI](https://chakra-ui.com/)
+- [Prisma](https://www.prisma.io/)
+- [TypeScript](https://www.typescriptlang.org/)
+- [OpenAI](https://openai.com/)
+- [AWS S3](https://aws.amazon.com/s3/)
 
-To learn more about Next.js, take a look at the following resources:
+## 📄 License
 
-- [Next.js Documentation](https://nextjs.org/docs) - learn about Next.js features and API.
-- [Learn Next.js](https://nextjs.org/learn-pages-router) - an interactive Next.js tutorial.
-
-You can check out [the Next.js GitHub repository](https://github.com/vercel/next.js) - your feedback and contributions are welcome!
-
-## Deploy on Vercel
-
-The easiest way to deploy your Next.js app is to use the [Vercel Platform](https://vercel.com/new?utm_medium=default-template&filter=next.js&utm_source=create-next-app&utm_campaign=create-next-app-readme) from the creators of Next.js.
-
-Check out our [Next.js deployment documentation](https://nextjs.org/docs/pages/building-your-application/deploying) for more details.
+This project is licensed under the MIT License.
