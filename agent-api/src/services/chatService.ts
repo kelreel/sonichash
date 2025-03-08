@@ -41,13 +41,6 @@ export class ChatService {
     this.actionsService = new ActionsService();
   }
 
-  private hasImageContent(messages: InputMessage[]): boolean {
-    return messages.some(msg => {
-      if (typeof msg.content === 'string') return false;
-      return msg.content.some(part => part.type === 'image_url');
-    });
-  }
-
   private getTextContent(message: InputMessage): string {
     if (typeof message.content === 'string') {
       return message.content;
@@ -129,6 +122,8 @@ export class ChatService {
       actionContext
     });
     const messages = this.convertToOpenAIMessages([...previousMessages, message], systemContext);
+
+    console.log('*** systemContext', systemContext);
 
     writeFileSync('messages-log--temp.json', JSON.stringify(messages, null, 2));
 

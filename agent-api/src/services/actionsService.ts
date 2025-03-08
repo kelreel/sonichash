@@ -5,7 +5,6 @@ import { AuthUser } from '../middlewares/authMiddleware';
 import axios from 'axios';
 import { AlloraPredictResponse } from '../types/allora-predict';
 import NodeCache from 'node-cache';
-import { ConfigService } from './configService';
 
 export type ActionType = 'PREDICT_PRICE'
 
@@ -80,7 +79,6 @@ export class ActionsService {
         const response = JSON.parse(content);
 
         if (response !== null && (!response.type || !response.params)) {
-          console.warn('Invalid action response structure:', response);
           return null;
         }
 

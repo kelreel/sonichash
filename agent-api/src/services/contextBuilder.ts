@@ -2,7 +2,7 @@ import { Agent } from '@prisma/client';
 import { AuthUser } from '../middlewares/authMiddleware';
 import { CryptoDataService } from './cryptoDataService';
 import { PriceService } from './priceService';
-
+import { SONIC_DOCS } from './sonic-docs';
 export interface ContextData {
   agent: Agent;
   user?: AuthUser;
@@ -26,9 +26,11 @@ export class ContextBuilder {
   ];
 
   private readonly walletKeywords = [
-    'balance', 'balances', 'wallet', 'holdings', 'tokens',
+    'balance', 'balances', 'wallet', 'holdingys', 'tokens',
     'portfolio', 'assets', 'funds', 'deposit', 'withdraw'
   ];
+
+  private readonly sonicKeywords = ['tps', 'blockchain', 'evm', 'token', 'finalty', 'ftm', 'sonic', 'staking', 'airdrop', 'funding', 'reward', 'block', 'burn', 'validator', 'ecosystem', 'vault', 'points', 'gem', 'boom', 'hold', 'migration', 'lp', 'consensus', 'dao', 'storage', 'stake', 'staking', 'proof', 'audit', 'node', 'bridge', 'swap', 'liquidity', 'dex', 'amm', 'router', 'explorer', 'wallet', 'bridge', 'swap', 'liquidity', 'dex', 'amm', 'router', 'explorer', 'launch', 'date'];
 
   constructor() {
     this.cryptoDataService = new CryptoDataService();
@@ -47,6 +49,12 @@ export class ContextBuilder {
     );
   }
 
+  private hasSonicKeywords(textContent: string): boolean {
+    return this.sonicKeywords.some(keyword => 
+      textContent.toLowerCase().includes(keyword)
+    );
+  }
+
   private buildAgentContext(agent: Agent): string {
     const lores = agent.lore?.split('\n').filter(Boolean) || [];
     const selectedLores = lores.sort(() => Math.random() - 0.5).slice(0, 3);
@@ -58,6 +66,14 @@ export class ContextBuilder {
     const bioResult = selectedBio.length ? `Biography: ${selectedBio.join('. ')}.` : '';
 
     return `${loreResult} ${bioResult}`.trim();
+  }
+
+  private buildSonicContext(messageContent: string): string {
+    if (this.hasSonicKeywords(messageContent)) {
+      return SONIC_DOCS.map(doc => `${doc.title}: ${doc.description}`).join('\n\n');
+    }
+
+    return '';
   }
 
   private async buildUserContext(messageContent: string, user?: AuthUser): Promise<string> {
@@ -96,7 +112,8 @@ export class ContextBuilder {
   public async buildContext(data: ContextData): Promise<string> {
     const agentContext = this.buildAgentContext(data.agent);
     const userContext = await this.buildUserContext(data.messageContent, data.user);
-    const messageHistory = this.buildMessageHistory(data.previousMessages);
+    const sonicContext = await this.buildSonicContext(data.messageContent);
+    // const messageHistory = this.buildMessageHistory(data.previousMessages);
     const actionContext = data.actionContext || '';
     const systemPrompt = data.agent.systemPrompt || '';
     const knowledge = data.agent.knowledge || '';
@@ -111,7 +128,8 @@ export class ContextBuilder {
       knowledge,
       style,
       userContext,
-      messageHistory,
+      // messageHistory,
+      sonicContext,
       actionContext
     ].filter(Boolean).join('\n\n');
   }

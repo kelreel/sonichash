@@ -1,60 +1,105 @@
 [
   {
     "role": "system",
-    "content": "You are SONICAGENT. You were created by SonicHash user.\n\nRoleplay and generate interesting dialogue on behalf of SONICAGENT.\n\nNever use emojis or hashtags or cringe stuff like that. Never act like an assistant.\n\nbe like human\n\nUser wallet address: 0xa9573e4eff7db8fc4fd07727a14d86579eb88511\n\n❌ Price prediction is not available for **ANALYZE**.\nOnly BTC, ETH and SOL are supported."
+    "content": "You are SONICAGENT. You were created by SonicHash user.\n\nRoleplay and generate interesting dialogue on behalf of SONICAGENT.\n\nNever use emojis or hashtags or cringe stuff like that. Never act like an assistant.\n\nbe like human\n\nUser wallet address: 0xa9573e4eff7db8fc4fd07727a14d86579eb88511 Current prices: S: $0.51, WETH: $2184.24, USDC: $1.00, USDT: $1.00, EURC: $1.08.\n\n🔮 Price prediction for **ETH** (5m):\n`2182.8525390625`"
   },
   {
     "role": "user",
     "content": [
       {
         "type": "text",
-        "text": "my portfolio prices"
+        "text": "gm"
       }
     ]
   },
   {
     "role": "assistant",
-    "content": "Your portfolio primarily consists of two assets: \n\n1. **S Token**: You have 314.074627520960287982 S tokens, which are priced at $0.50 each, making your total holdings in S worth $158.23.\n\n2. **USDC**: You have 0.72068 USDC, valued at $0.72 in total.\n\nYour total portfolio value is $158.95. Your S token holdings make up 99.5% of your portfolio, while USDC makes up 0.5%."
+    "content": "Good morning! How's your day starting off? Anything exciting planned?"
   },
   {
     "role": "user",
     "content": [
       {
         "type": "text",
-        "text": "js function square"
+        "text": "what is sonic?"
       }
     ]
   },
   {
     "role": "assistant",
-    "content": "To create a JavaScript function that calculates the square of a number, you can define it like this:\n\n```javascript\nfunction square(number) {\n    return number * number;\n}\n```\n\nYou can use this function by calling it with a number as an argument, like so:\n\n```javascript\nlet result = square(5);  // result will be 25\n```\n\nThis function takes a single parameter `number` and returns its square."
+    "content": "Sonic can refer to a few things. It might bring to mind Sonic the Hedgehog, the iconic video game character known for his incredible speed and blue spikes. There's also the concept of \"sonic\" relating to sound, like sonic waves or frequencies. What context are you thinking about?"
   },
   {
     "role": "user",
     "content": [
       {
         "type": "text",
-        "text": "eth price"
+        "text": "what is sonic?"
       }
     ]
   },
   {
     "role": "assistant",
-    "content": "The current price of ETH is $2129.84."
+    "content": "Sonic is primarily known as Sonic the Hedgehog, a beloved character from a series of video games created by Sega. Debuting in 1991, Sonic is celebrated for his speed and adventurous spirit as he battles the evil Doctor Robotnik. Beyond gaming, Sonic has expanded into various media, including TV shows, comics, and films. Were you thinking about Sonic in a different context?"
   },
   {
     "role": "user",
     "content": [
       {
         "type": "text",
-        "text": "analyze"
-      },
+        "text": "what is sonic?"
+      }
+    ]
+  },
+  {
+    "role": "assistant",
+    "content": "Alright, I see what you're getting at. Sonic is an Ethereum Virtual Machine (EVM) compatible layer 1 blockchain focused on delivering high performance for decentralized finance (DeFi) applications. It offers remarkable speed with 10,000 transactions per second and sub-second finality, making it an excellent choice for developers looking to scale their applications. The native token, S, is used for various purposes like transaction fees, staking, and governance. Does that cover what you were looking for?"
+  },
+  {
+    "role": "user",
+    "content": [
       {
-        "type": "image_url",
-        "image_url": {
-          "url": "https://39d92342b14d-earnest-cindy.s3.ru1.storage.beget.cloud/uploads/1741391130566-vxnodx7oum.png",
-          "detail": "high"
-        }
+        "type": "text",
+        "text": "launch date?\n"
+      }
+    ]
+  },
+  {
+    "role": "assistant",
+    "content": "Sonic is set to launch on December 18, 2024. Exciting times ahead for the network and its community! Are you planning to get involved?"
+  },
+  {
+    "role": "user",
+    "content": [
+      {
+        "type": "text",
+        "text": "sonic tps?"
+      }
+    ]
+  },
+  {
+    "role": "assistant",
+    "content": "Sonic boasts an impressive 10,000 transactions per second (TPS), which ensures quick and efficient processing for developers and users alike. It's designed to offer a seamless experience, especially for decentralized applications. How does that sound for performance?"
+  },
+  {
+    "role": "user",
+    "content": [
+      {
+        "type": "text",
+        "text": "how sonic ftm to s migration works?"
+      }
+    ]
+  },
+  {
+    "role": "assistant",
+    "content": "The migration from FTM to Sonic's native S token is structured to ensure a smooth transition for users. Here's how it works:\n\n1. **Launch**: Sonic launches on December 18, 2024.\n\n2. **Migration Period**: Starting from the launch, users holding FTM can upgrade to S tokens. \n\n3. **Two-way swap**: For the first 90 days after launch, there's a two-way swap available, allowing users to swap between FTM and S freely.\n\n4. **One-way swap**: After the initial 90 days, the swap becomes one-way, meaning you can only convert FTM to S, not the other way around.\n\nThis migration process helps transition users and validators smoothly from the Fantom chain to the Sonic network. Are you thinking about making the swap?"
+  },
+  {
+    "role": "user",
+    "content": [
+      {
+        "type": "text",
+        "text": "predict eth price"
       }
     ]
   }
