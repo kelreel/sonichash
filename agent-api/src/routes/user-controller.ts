@@ -11,7 +11,7 @@ router.use(authMiddleware);
 router.get('/agents', async (req, res) => {
     const agents = await prisma.agent.findMany({
         where: {
-            userId: req.user.id
+            userId: req.user?.id
         },
     });
     res.send(agents);

@@ -4,12 +4,8 @@ import { prisma } from "../prisma";
 import { z } from "zod";
 import { authMiddleware, AuthUser } from "../middlewares/authMiddleware";
 
-import OpenAI from "openai";
-import { ChatCompletionContentPart } from "openai/resources/chat/completions.mjs";
 import { Prisma } from "@prisma/client";
 import { ChatService } from "../services/chatService";
-import { ActionsService, Action, ActionResult } from '../services/actionsService';
-import { Request, Response } from 'express';
 
 const router = Router();
 
